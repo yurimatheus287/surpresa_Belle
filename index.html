@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sob as Estrelas - Belle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#070b1f;
+    --bg-deep-2:#0d1230;
+    --panel: rgba(24, 33, 68, 0.55);
+    --panel-border: rgba(232, 198, 111, 0.22);
+    --gold:#e8c66f;
+    --gold-bright:#f4d78a;
+    --text-light:#f3ecd9;
+    --text-mut:#b6bfe0;
+    --line: rgba(232, 198, 111, 0.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body.locked{overflow:hidden; height:100vh;}
+  body{
+    font-family:'Lora', serif;
+    background: radial-gradient(ellipse at 50% -10%, #16204a 0%, var(--bg-deep) 55%, #040614 100%);
+    color: var(--text-light);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  h1,h2,h3{font-family:'Cormorant Garamond', serif; font-weight:600; letter-spacing:0.02em;}
+
+  /* ---------- estrelas de fundo ---------- */
+  #starfield{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .star{position:absolute; background:var(--text-light); border-radius:50%; opacity:0.6; animation:twinkle 3.5s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.15;} 50%{opacity:0.9;}}
+  .shooting-star{
+    position:absolute; width:2px; height:2px; background:var(--gold-bright);
+    border-radius:50%;
+    box-shadow: 0 0 6px 2px var(--gold-bright);
+    opacity:0;
+    animation: shoot 6s linear infinite;
+  }
+  .shooting-star::before{
+    content:''; position:absolute; top:0; left:0; width:90px; height:1px;
+    background: linear-gradient(90deg, var(--gold-bright), transparent);
+    transform: translateX(-90px) rotate(0deg);
+  }
+  @keyframes shoot{
+    0%{opacity:0; transform:translate(0,0);}
+    5%{opacity:1;}
+    25%{opacity:0; transform:translate(-420px, 260px);}
+    100%{opacity:0;}
+  }
+
+  .container{position:relative; z-index:1; max-width:880px; margin:0 auto; padding:20px;}
+  .container.hidden{visibility:hidden;}
+
+  /* ---------- tela de abertura ---------- */
+  #gate{
+    position:fixed; inset:0; z-index:500;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at 50% 30%, #16204a 0%, var(--bg-deep) 60%, #040614 100%);
+    text-align:center; padding:20px;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #gate.fade-out{opacity:0; visibility:hidden; pointer-events:none;}
+  #gate .gate-eyebrow{color:var(--gold); letter-spacing:0.35em; text-transform:uppercase; font-size:0.72em; margin-bottom:10px;}
+  #gate h1{font-size:2.4em; color:var(--text-light); text-shadow:0 0 24px rgba(232,198,111,0.35); margin-bottom:10px;}
+  #gate p.gate-sub{color:var(--text-mut); font-style:italic; margin-bottom:38px; max-width:320px;}
+  .play-button{
+    width:92px; height:92px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 75%);
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 0 rgba(232,198,111,0.5);
+    animation: playPulse 2.4s infinite;
+    transition: transform 0.25s ease;
+  }
+  .play-button:hover{transform:scale(1.08);}
+  .play-button svg{width:34px; height:34px; fill:#241a05; margin-left:5px;}
+  @keyframes playPulse{
+    0%{box-shadow:0 0 0 0 rgba(232,198,111,0.45);}
+    70%{box-shadow:0 0 0 22px rgba(232,198,111,0);}
+    100%{box-shadow:0 0 0 0 rgba(232,198,111,0);}
+  }
+  #gate .gate-hint{margin-top:22px; color:var(--text-mut); font-size:0.85em; letter-spacing:0.05em;}
+
+  /* ---------- header ---------- */
+  .header{text-align:center; padding:60px 20px 30px; animation:fadeIn 1.2s ease-in both;}
+  .header .eyebrow{color:var(--gold); letter-spacing:0.35em; text-transform:uppercase; font-size:0.72em; font-family:'Lora',serif;}
+  .header h1{font-size:3.4em; color:var(--text-light); text-shadow: 0 0 24px rgba(232,198,111,0.35); margin:8px 0 6px;}
+  .header .divider{width:120px; height:1px; background:linear-gradient(90deg, transparent, var(--gold), transparent); margin:14px auto;}
+  .header p{font-size:1.05em; color:var(--text-mut); font-style:italic;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(-16px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- painel genérico ---------- */
+  .panel{
+    background: var(--panel);
+    backdrop-filter: blur(14px);
+    border:1px solid var(--panel-border);
+    border-radius:18px;
+    padding:40px;
+    margin:34px 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+  .panel h2{font-size:1.9em; text-align:center; margin-bottom:22px; color:var(--gold-bright);}
+
+  /* ---------- contador ---------- */
+  .time-display{display:flex; justify-content:center; gap:18px; flex-wrap:wrap;}
+  .time-unit{
+    background: rgba(232,198,111,0.06);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:18px 22px;
+    min-width:96px;
+    text-align:center;
+  }
+  .time-unit .number{font-family:'Cormorant Garamond',serif; font-size:2.4em; font-weight:700; color:var(--gold-bright); display:block;}
+  .time-unit .label{font-size:0.78em; opacity:0.8; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-mut);}
+
+  /* ---------- galeria ---------- */
+  .photo-gallery{position:relative; max-width:680px; margin:0 auto; border-radius:16px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid var(--panel-border);}
+  .slideshow-container{position:relative; width:100%; aspect-ratio:4/3; background:rgba(0,0,0,0.3);}
+  .photo-item{display:none; width:100%; height:100%; position:absolute; inset:0; animation:fadeInSlide 1s ease-in-out;}
+  .photo-item.active{display:block;}
+  @keyframes fadeInSlide{from{opacity:0; transform:scale(1.06);} to{opacity:1; transform:scale(1);}}
+  .photo-item img, .photo-item video{width:100%; height:100%; object-fit:cover; background:#000;}
+  .slideshow-dots{position:absolute; bottom:16px; width:100%; text-align:center; z-index:10;}
+  .dot{height:9px; width:9px; margin:0 4px; background:rgba(243,236,217,0.4); border-radius:50%; display:inline-block; cursor:pointer; transition:all .3s;}
+  .dot.active{background:var(--gold-bright); transform:scale(1.3); box-shadow:0 0 8px var(--gold-bright);}
+
+  /* ---------- linha do tempo ---------- */
+  .timeline{position:relative; padding-left:36px; max-width:640px; margin:0 auto;}
+  .timeline::before{
+    content:''; position:absolute; left:8px; top:6px; bottom:6px; width:1px;
+    background: linear-gradient(180deg, var(--gold), rgba(232,198,111,0.05));
+  }
+  .timeline-item{position:relative; margin-bottom:34px; opacity:0; transform:translateX(-14px); transition:opacity .7s ease, transform .7s ease;}
+  .timeline-item.in-view{opacity:1; transform:translateX(0);}
+  .timeline-item::before{
+    content:'✦'; position:absolute; left:-36px; top:-2px; color:var(--gold-bright); font-size:1.1em;
+    text-shadow:0 0 10px rgba(244,215,138,0.7);
+  }
+  .timeline-item .t-date{font-size:0.78em; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:4px;}
+  .timeline-item .t-text{color:var(--text-light); font-size:1.05em; line-height:1.6;}
+  .timeline-item .t-text em{color:var(--text-mut);}
+
+  /* ---------- cartinha surpresa (envelope) ---------- */
+  .envelope-wrap{text-align:center; margin:0 auto; max-width:420px;}
+  .envelope{
+    position:relative; width:100%; aspect-ratio:3/2; cursor:pointer; margin:0 auto;
+    filter:drop-shadow(0 10px 25px rgba(0,0,0,0.5));
+  }
+  .envelope-body{
+    position:absolute; inset:0; background:linear-gradient(160deg,#1c2750,#141b3a);
+    border:1px solid var(--panel-border); border-radius:10px;
+  }
+  .envelope-flap{
+    position:absolute; top:0; left:0; width:100%; height:55%;
+    background:linear-gradient(160deg,#233066,#182247);
+    clip-path: polygon(0 0, 100% 0, 50% 90%);
+    transform-origin: top;
+    transition: transform 0.7s cubic-bezier(.4,0,.2,1);
+    border-radius:10px 10px 0 0;
+  }
+  .envelope.open .envelope-flap{transform: rotateX(180deg);}
+  .envelope-seal{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    width:44px; height:44px; border-radius:50%; background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 70%);
+    display:flex; align-items:center; justify-content:center; font-size:1.1em; color:#241a05; z-index:3;
+    box-shadow:0 0 14px rgba(232,198,111,0.6);
+    transition: opacity .3s;
+  }
+  .envelope.open .envelope-seal{opacity:0;}
+  .envelope-hint{margin-top:16px; color:var(--text-mut); font-style:italic; font-size:0.95em;}
+  .letter-panel{
+    display:none; margin-top:26px; text-align:left; background:rgba(232,198,111,0.05);
+    border:1px solid var(--panel-border); border-radius:14px; padding:32px;
+    animation:fadeIn 0.8s ease-in both;
+  }
+  .letter-panel.show{display:block;}
+  .letter-panel p{font-size:1.08em; line-height:1.85; white-space:pre-line; font-style:italic; color:var(--text-light);}
+  .letter-panel .signoff{text-align:right; margin-top:16px; color:var(--gold-bright); font-family:'Cormorant Garamond',serif; font-size:1.3em; font-style:normal;}
+
+  /* ---------- música ---------- */
+  .music-control{
+    position:fixed; bottom:26px; right:26px; width:66px; height:66px; border-radius:50%;
+    background:linear-gradient(160deg,#1c2750,#0d1230); border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:100;
+    box-shadow:0 8px 22px rgba(0,0,0,0.5); transition:transform .3s;
+  }
+  .music-control:hover{transform:scale(1.1);}
+  .music-control svg{width:26px; height:26px; fill:var(--gold-bright);}
+
+  /* ---------- qr ---------- */
+  .qr-section{text-align:center; margin:34px 0;}
+  .qr-button{
+    background:transparent; border:1px solid var(--gold); color:var(--gold-bright);
+    padding:12px 30px; border-radius:24px; font-size:1em; cursor:pointer; transition:all .3s; font-family:'Lora',serif;
+  }
+  .qr-button:hover{background:var(--gold); color:#141b3a;}
+  .modal{display:none; position:fixed; inset:0; background:rgba(4,6,20,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px;}
+  .modal.active{display:flex;}
+  .modal-content{background:#f3ecd9; color:#22284a; border-radius:16px; padding:36px; max-width:440px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+  .modal-content h2{color:#1c2750; margin-bottom:16px;}
+  #qrCodeContainer{margin:20px auto; display:inline-block;}
+  .button-group{display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;}
+  .btn{padding:11px 22px; border:none; border-radius:10px; font-size:0.95em; cursor:pointer; font-weight:600;}
+  .btn-primary{background:#1c2750; color:#f3ecd9;}
+  .btn-secondary{background:#ddd; color:#333;}
+
+  footer.credit{text-align:center; padding:30px 10px 60px; color:var(--text-mut); font-size:0.85em; letter-spacing:0.05em;}
+
+  @media(max-width:640px){
+    .header h1{font-size:2.3em;}
+    .panel{padding:26px;}
+    .time-unit{min-width:74px; padding:12px;}
+    .time-unit .number{font-size:1.7em;}
+  }
+</style>
+</head>
+<body class="locked">
+
+<div id="gate">
+  <div class="gate-eyebrow">para</div>
+  <h1>✦ Belle ✦</h1>
+  <p class="gate-sub">toque para começar</p>
+  <button class="play-button" id="gateButton" aria-label="Começar">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <p class="gate-hint">com música nossa ✨</p>
+</div>
+
+<div id="starfield"></div>
+
+<div class="container hidden" id="mainContent">
+
+  <div class="header">
+    <div class="eyebrow">para</div>
+    <h1>✦ Belle ✦</h1>
+    <div class="divider"></div>
+    <!-- A data abaixo é só de exibição, o cálculo real está no <script> no fim da página -->
+    <p>Sob as mesmas estrelas desde <span id="startDateDisplay">16/10/2025</span></p>
+  </div>
+
+  <div class="panel">
+    <h2>Nosso Tempo Juntos</h2>
+    <div class="time-display">
+      <div class="time-unit"><span class="number" id="years">0</span><span class="label">Anos</span></div>
+      <div class="time-unit"><span class="number" id="months">0</span><span class="label">Meses</span></div>
+      <div class="time-unit"><span class="number" id="days">0</span><span class="label">Dias</span></div>
+      <div class="time-unit"><span class="number" id="hours">0</span><span class="label">Horas</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 📸 FOTOS - troque os arquivos 1.jpeg a 8.jpeg -->
+  <!-- Pode ter de 6 a 12 fotos: copie/cole um bloco  -->
+  <!-- ".photo-item" e um ".dot" para cada foto extra -->
+  <!-- ============================================ -->
+  <div class="panel" style="padding:16px;">
+    <div class="photo-gallery">
+      <div class="slideshow-container">
+        <div class="photo-item active"><img src="1.jpeg" alt="Foto 1"></div>
+        <div class="photo-item"><img src="2.jpeg" alt="Foto 2"></div>
+        <div class="photo-item"><img src="3.jpeg" alt="Foto 3"></div>
+        <div class="photo-item"><img src="4.jpeg" alt="Foto 4"></div>
+        <div class="photo-item"><img src="5.jpeg" alt="Foto 5"></div>
+        <div class="photo-item"><img src="6.jpeg" alt="Foto 6"></div>
+        <div class="photo-item"><img src="7.jpeg" alt="Foto 7"></div>
+        <div class="photo-item"><img src="8.jpeg" alt="Foto 8"></div>
+        <div class="photo-item"><img src="9.jpeg" alt="Foto 9"></div>
+        <div class="photo-item"><img src="10.jpeg" alt="Foto 10"></div>
+        <div class="photo-item"><img src="11.jpeg" alt="Foto 11"></div>
+        <div class="photo-item"><img src="12.jpeg" alt="Foto 12"></div>
+        <div class="photo-item"><img src="13.jpeg" alt="Foto 13"></div>
+        <div class="photo-item"><img src="14.jpeg" alt="Foto 14"></div>
+        <div class="photo-item"><img src="15.jpeg" alt="Foto 15"></div>
+        <!-- vídeos - tocam mudos e em loop dentro do slide, com controles pra ativar som -->
+        <div class="photo-item"><video src="video1.mp4" autoplay muted loop playsinline controls></video></div>
+        <div class="photo-item"><video src="video2.mp4" autoplay muted loop playsinline controls></video></div>
+        <div class="photo-item"><video src="video3.mp4" autoplay muted loop playsinline controls></video></div>
+      </div>
+      <div class="slideshow-dots">
+        <span class="dot active" onclick="showSlide(0)"></span>
+        <span class="dot" onclick="showSlide(1)"></span>
+        <span class="dot" onclick="showSlide(2)"></span>
+        <span class="dot" onclick="showSlide(3)"></span>
+        <span class="dot" onclick="showSlide(4)"></span>
+        <span class="dot" onclick="showSlide(5)"></span>
+        <span class="dot" onclick="showSlide(6)"></span>
+        <span class="dot" onclick="showSlide(7)"></span>
+        <span class="dot" onclick="showSlide(8)"></span>
+        <span class="dot" onclick="showSlide(9)"></span>
+        <span class="dot" onclick="showSlide(10)"></span>
+        <span class="dot" onclick="showSlide(11)"></span>
+        <span class="dot" onclick="showSlide(12)"></span>
+        <span class="dot" onclick="showSlide(13)"></span>
+        <span class="dot" onclick="showSlide(14)"></span>
+        <span class="dot" onclick="showSlide(15)"></span>
+        <span class="dot" onclick="showSlide(16)"></span>
+        <span class="dot" onclick="showSlide(17)"></span>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 🌌 LINHA DO TEMPO - edite datas e textos aqui -->
+  <!-- Copie um .timeline-item para adicionar mais   -->
+  <!-- ============================================ -->
+  <div class="panel">
+    <h2>Nossa Linha do Tempo</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="t-date">11 de outubro de 2025</span>
+        <p class="t-text">A primeira vez que nos vimos pessoalmente.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="t-date">16 de outubro de 2025</span>
+        <p class="t-text">Nossa primeira saída juntos. <em>— e a desculpa do cinto pra te beijar</em></p>
+      </div>
+      <div class="timeline-item">
+        <span class="t-date">17 de outubro de 2025</span>
+        <p class="t-text">O dia em que te dei uma rosa pela primeira vez.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="t-date">31 de maio de 2026</span>
+        <p class="t-text">O dia em que meu coração bateu mais forte ao te reencontrar.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="t-date">Hoje</span>
+        <p class="t-text">E a gente ainda está escrevendo essa história. <em>— e temos muitas experiencias para vivermos juntos</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 💌 CARTINHA SURPRESA - cole seu texto abaixo  -->
+  <!-- Troque o conteúdo dentro de <p id="letterText"> -->
+  <!-- ============================================ -->
+  <div class="panel">
+    <h2>Uma Cartinha Para Você</h2>
+    <div class="envelope-wrap">
+      <div class="envelope" id="envelope" onclick="openEnvelope()">
+        <div class="envelope-body"></div>
+        <div class="envelope-flap"></div>
+        <div class="envelope-seal">❤</div>
+      </div>
+      <p class="envelope-hint" id="envelopeHint">toque no envelope para abrir</p>
+
+      <div class="letter-panel" id="letterPanel">
+        <p id="letterText">Belle,
+
+Às vezes eu paro para pensar em como a vida é cheia de encontros improváveis. Em meio a tantas pessoas, tantos caminhos e tantas histórias diferentes, Deus permitiu que as nossas vidas se encontrassem. E, desde então, eu nunca mais fui o mesmo.
+
+Você chegou de um jeito tão natural que, sem perceber, foi ocupando os espaços mais importantes do meu coração. Aos poucos, você se tornou a pessoa com quem eu queria compartilhar as minhas conquistas, dividir os meus medos, contar as minhas melhores notícias e encontrar paz depois de um dia difícil.
+
+Estar com você sempre fez a vida parecer mais bonita. Não pelos lugares que conhecemos ou pelas coisas que fizemos, mas porque você transformou momentos simples em lembranças que eu vou levar para sempre. Um abraço seu sempre foi mais confortável do que qualquer lugar no mundo. Um sorriso seu sempre teve o poder de mudar completamente o meu dia. E conversar com você por telefone até de madrugada, sempre foi uma das minhas partes favoritas da rotina.
+
+Se hoje alguém me perguntasse o que eu mais admiro em você, eu nem saberia por onde começar. Eu admiro o seu coração, a sua força, a sua delicadeza, a maneira como você cuida das pessoas que ama, o seu jeito único de enxergar a vida e até os pequenos detalhes que talvez você nem perceba, mas que fazem você ser exatamente quem é. Foi por tudo isso que eu me apaixonei, e é por tudo isso que continuo me apaixonando todos os dias.
+
+Sabe o que mais me encanta? É pensar que a nossa história ainda está sendo escrita. Ainda existem tantos lugares para conhecer, tantas fotos para tirar, tantas risadas para dar, tantas conquistas para comemorar, tantos sonhos para realizar, tantas memórias esperando para nascer e tantas primeiras vezes. Quando penso no futuro, é impossível não imaginar você fazendo parte dele.
+
+Eu gosto de acreditar que o amor verdadeiro não se resume aos grandes gestos. Ele mora nas pequenas coisas: nas conversas sem pressa, nas mensagens inesperadas, nos olhares que dizem tudo sem precisar de palavras, nas orações feitas um pelo outro, nas mãos dadas e na tranquilidade de saber que existe alguém que faz qualquer dia valer a pena.
+
+E é exatamente isso que você representa para mim. Você é a minha paz em meio ao caos, o meu sorriso nos dias difíceis, a resposta de muitas das orações que um dia fiz sem nem saber como seriam respondidas.
+
+Obrigado por existir. Obrigado por fazer parte da minha vida e por permitir que eu faça parte da sua. Se existe algo que eu peço a Deus todos os dias, é que Ele continue guiando os nossos passos, fortalecendo o nosso amor e nos permitindo viver tudo aquilo que ainda sonhamos juntos.
+
+Quero continuar escolhendo você em cada fase da vida. Quero envelhecer ao seu lado, olhar para trás daqui a muitos anos e perceber que a melhor decisão que eu tomei foi amar você com todo o meu coração.
+
+Não quero que uma tempestade passageira destrua uma história que levou tanto tempo para ser construída. Nós já fomos muito felizes juntos, e eu acredito que ainda podemos ser muito mais. O nosso amor merece mais uma chance de respirar, de amadurecer e de florescer.
+
+Você é a mulher com quem eu imagino o meu futuro. É você quem eu quero ao meu lado nas minhas conquistas, nos dias bons e também nos dias difíceis. Porque amar alguém não é permanecer apenas quando tudo está bem, mas escolher ficar quando vale a pena lutar. E você vale.
+
+Se hoje eu pudesse te fazer um único pedido, seria para que você olhasse para a nossa história com o mesmo carinho que eu olho. Que lembrasse de tudo o que vivemos, de tudo o que superamos e de todos os motivos que fizeram nossos corações escolherem um ao outro.
+
+Independentemente das dificuldades, se for com você, eu sempre vou escolher tentar mais uma vez.
+
+Eu escolho você. Hoje, amanhã e quantas vezes for necessário.
+
+Belle, você é, sem dúvida, um dos maiores presentes que Deus já colocou na minha vida. E, aconteça o que acontecer, nunca quero que você esqueça o quanto é amada, admirada e importante para mim.
+
+Eu te amo. Não apenas pelo que você representa hoje, mas por tudo o que ainda vamos viver juntos. E, se Deus permitir, quero passar uma vida inteira criando lembranças ao seu lado, porque entre todas as histórias que eu poderia viver, a minha favorita sempre será a nossa.</p>
+        <p class="signoff">Com carinho, Yuri.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qr-section">
+    <button class="qr-button" onclick="generateQRCode()">✦ Gerar QR Code</button>
+  </div>
+
+  <footer class="credit">feito com amor, Yuri ✦</footer>
+</div>
+
+<div class="music-control" onclick="toggleMusic()">
+  <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+</div>
+
+<!-- 🎵 Música local - coloque o arquivo na mesma pasta e ajuste o nome abaixo se precisar -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<div class="modal" id="qrModal">
+  <div class="modal-content">
+    <h2>QR Code da Declaração</h2>
+    <p style="color:#444; margin-bottom:16px;">Mostre este QR Code para ela escanear!</p>
+    <div id="qrCodeContainer"></div>
+    <p style="color:#555; font-size:0.85em; margin:16px 0;">Ou compartilhe o link:<br><strong id="shareLink" style="color:#1c2750; word-break:break-all;"></strong></p>
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="downloadQRCode()">Baixar QR Code</button>
+      <button class="btn btn-secondary" onclick="closeQRModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // ⚠️ CONFIRA SEMPRE O ANO CERTO AQUI — é o bug que causava a contagem errada antes
+  const startDate = new Date('2025-10-16'); // ANO-MÊS-DIA
+
+  let musicPlaying = false;
+  let currentSlide = 0;
+
+  // estrelas de fundo
+  function createStars(){
+    const field = document.getElementById('starfield');
+    for(let i=0;i<130;i++){
+      const s = document.createElement('div');
+      s.className='star';
+      const size = Math.random()*2 + 1;
+      s.style.width = size+'px';
+      s.style.height = size+'px';
+      s.style.left = Math.random()*100+'%';
+      s.style.top = Math.random()*100+'%';
+      s.style.animationDelay = (Math.random()*3.5)+'s';
+      field.appendChild(s);
+    }
+    for(let i=0;i<3;i++){
+      const sh = document.createElement('div');
+      sh.className='shooting-star';
+      sh.style.top = (Math.random()*40)+'%';
+      sh.style.left = (55 + Math.random()*35)+'%';
+      sh.style.animationDelay = (i*4 + Math.random()*3)+'s';
+      field.appendChild(sh);
+    }
+  }
+
+  function showSlide(n){
+    const slides = document.getElementsByClassName('photo-item');
+    const dots = document.getElementsByClassName('dot');
+    if(slides.length===0) return;
+    if(n>=slides.length) currentSlide=0; else if(n<0) currentSlide=slides.length-1; else currentSlide=n;
+    for(let i=0;i<slides.length;i++){ slides[i].classList.remove('active'); if(dots[i]) dots[i].classList.remove('active'); }
+    slides[currentSlide].classList.add('active');
+    if(dots[currentSlide]) dots[currentSlide].classList.add('active');
+  }
+  function nextSlide(){ showSlide(currentSlide+1); }
+  function startSlideshow(){ setInterval(nextSlide, 4000); }
+
+  function updateCounter(){
+    const now = new Date();
+    const diff = now - startDate;
+    const years = Math.floor(diff/(1000*60*60*24*365));
+    const months = Math.floor((diff%(1000*60*60*24*365))/(1000*60*60*24*30));
+    const days = Math.floor((diff%(1000*60*60*24*30))/(1000*60*60*24));
+    const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    document.getElementById('years').textContent = years;
+    document.getElementById('months').textContent = months;
+    document.getElementById('days').textContent = days;
+    document.getElementById('hours').textContent = hours;
+  }
+
+  function toggleMusic(){
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const audio = document.getElementById('bgMusic');
+    if(musicPlaying){
+      audio.pause();
+      playIcon.style.display='block'; pauseIcon.style.display='none';
+    } else {
+      audio.play().catch(()=>{});
+      playIcon.style.display='none'; pauseIcon.style.display='block';
+    }
+    musicPlaying = !musicPlaying;
+  }
+
+  function openEnvelope(){
+    const env = document.getElementById('envelope');
+    const panel = document.getElementById('letterPanel');
+    const hint = document.getElementById('envelopeHint');
+    env.classList.add('open');
+    setTimeout(()=>{ panel.classList.add('show'); panel.scrollIntoView({behavior:'smooth', block:'center'}); }, 500);
+    hint.textContent = 'com carinho, para você';
+  }
+
+  function generateQRCode(){
+    const currentUrl = window.location.href;
+    const modal = document.getElementById('qrModal');
+    const container = document.getElementById('qrCodeContainer');
+    const linkElement = document.getElementById('shareLink');
+    container.innerHTML='';
+    linkElement.textContent = currentUrl;
+    if(typeof QRCode !== 'undefined'){
+      try{
+        new QRCode(container, { text: currentUrl, width:220, height:220, colorDark:'#1c2750', colorLight:'#f3ecd9', correctLevel:QRCode.CorrectLevel.H });
+      }catch(e){ container.innerHTML = '<p style="color:red;">Erro ao gerar QR Code.</p>'; }
+    } else {
+      container.innerHTML = '<p>Carregando...</p>';
+      setTimeout(generateQRCode, 500);
+    }
+    modal.classList.add('active');
+  }
+  function closeQRModal(){ document.getElementById('qrModal').classList.remove('active'); }
+  function downloadQRCode(){
+    const canvas = document.querySelector('#qrCodeContainer canvas');
+    if(canvas){
+      const link = document.createElement('a');
+      link.download = 'qrcode-declaracao-belle.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  }
+
+  // anima a linha do tempo ao rolar
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in-view'); });
+  }, {threshold:0.3});
+  document.querySelectorAll('.timeline-item').forEach(el=>observer.observe(el));
+
+  // tela de abertura: ao tocar no play, a música começa e a página revela
+  function openGate(){
+    const gate = document.getElementById('gate');
+    const content = document.getElementById('mainContent');
+    const audio = document.getElementById('bgMusic');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+
+    audio.play().catch(()=>{});
+    musicPlaying = true;
+    playIcon.style.display = 'none';
+    pauseIcon.style.display = 'block';
+
+    gate.classList.add('fade-out');
+    content.classList.remove('hidden');
+    document.body.classList.remove('locked');
+  }
+  document.getElementById('gateButton').addEventListener('click', openGate);
+
+  createStars();
+  updateCounter();
+  setInterval(updateCounter, 1000);
+  startSlideshow();
+</script>
+</body>
+</html>
